@@ -59,7 +59,7 @@ READY; a Scoreboard with payments (900, 84), (1500, 84), (1800, 76),
 
 **Files:** `entity/Waiter.java`, `entity/Chef.java`, `entity/Cashier.java`
 **Branch:** `feature/staff`
-**Due:** Mon 26 Oct, 11:59 PM (start after A and B have opened their PRs)
+**Due:** Sun 25 Oct, 11:59 PM
 
 Implement every method marked `TODO (C)`. Key rules:
 - **Check first, act second.** If any rule is broken, throw
@@ -83,7 +83,7 @@ customer, cooking a READY order) and check the message and that nothing changed.
 
 **Files:** `boundary/RestaurantUI.java`
 **Branch:** `feature/ui`
-**Due:** Mon 26 Oct, 11:59 PM
+**Due:** Sun 25 Oct, 11:59 PM
 
 Implement every method marked `TODO (D)`. Key rules:
 - The UI never checks game rules; it only displays and reads.
@@ -108,7 +108,7 @@ Scoreboard and call each show method; type bad input ("abc", "9") into
 ## Lead: GameController, ArrivalSchedule, Main
 
 **Files:** `control/GameController.java`, `control/ArrivalSchedule.java`, `Main.java`
-**Due:** integrated and tagged `stage-1` by Wed 28 Oct
+**Due:** integrated and tagged `stage-1` by Mon 26 Oct, 11:59 PM
 
 Review and merge pull requests in order B -> A -> C -> D. Implement the turn
 engine; write the victory and defeat replay files; tag `stage-1`.
