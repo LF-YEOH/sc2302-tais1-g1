@@ -20,3 +20,35 @@ Cost:     - No built-in test runner, so we can't easily use JUnit;
             portable build file.
           - A larger project would outgrow this; for ~20 classes it
             is enough.
+
+## D2: MenuItem as an interface, not an abstract class
+Context:  Dish (S1) and ComboMeal (S3) must both be orderable items
+          with a name, price and preparation units.
+Options:  (a) Abstract class MenuItem holding name/price/units fields
+          (b) Interface MenuItem declaring the three getters
+Chose:    (b)
+Because:  - Dish stores its values; ComboMeal derives them from its
+            components. Shared fields would duplicate derived data
+            in ComboMeal and could drift out of sync.
+          - ComboMeal can hold two MenuItems and itself be a MenuItem
+            (Composite pattern), so Order, Chef and Waiter treat
+            combos and dishes identically (polymorphism).
+          - Stage 3 adds ComboMeal without modifying MenuItem or
+            Dish (OCP).
+Cost:     No place for shared implementation; if items later share
+          behaviour it must be repeated or put in a default method.
+
+## D3: Money as integer cents
+Context:  Prices are discounted (VIP 10%, Happy Hour 20%, combos 10%)
+          and must be displayed exactly.
+Options:  (a) double dollars
+          (b) BigDecimal
+          (c) int cents with one rounding helper
+Chose:    (c)
+Because:  - double cannot represent many decimal values exactly, so
+            stacked discounts drift by a cent.
+          - BigDecimal is exact but verbose for amounts this small.
+          - int cents is exact for storage; Money.applyPercent rounds
+            to the nearest cent in exactly one place.
+Cost:     Every display must go through Money.format; forgetting
+          shows "1830" instead of "$18.30".
