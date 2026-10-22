@@ -3,11 +3,11 @@ package restaurant;
 import restaurant.entity.Menu;
 
 /**
- * Starting point of the Restaurant Rush game.
+ * Restaurant Rush: a turn-based restaurant management game (SC2002 group assignment).
+ * Starting point of the program.
  *
- * @author Yeoh Lin Feng
- * @version 1.0
- * @since 2026-10-22
+ * Author: Yeoh Lin Feng
+ * Written: October 2026
  */
 public class Main {
 

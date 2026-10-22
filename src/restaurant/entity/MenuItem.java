@@ -4,10 +4,6 @@ package restaurant.entity;
  * Represents one item on the restaurant menu, such as Salad or Burger.
  * A menu item knows its name, its price and how many preparation units
  * the Chef needs to cook it. It cannot change after it is created.
- *
- * @author Yeoh Lin Feng
- * @version 1.0
- * @since 2026-10-22
  */
 public class MenuItem {
 

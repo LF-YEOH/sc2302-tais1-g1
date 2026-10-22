@@ -6,10 +6,6 @@ import java.util.ArrayList;
  * Represents the restaurant's menu: Salad, Burger and Pasta.
  * The menu creates and owns its items (composition), and only lets
  * other classes read them, never add or remove them.
- *
- * @author Yeoh Lin Feng
- * @version 1.0
- * @since 2026-10-22
  */
 public class Menu {
 
