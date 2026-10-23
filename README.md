@@ -40,7 +40,7 @@ The design is in `docs/design-stage1.md`; design decisions are in `docs/DECISION
    skeleton; keep it accurate if you add private helper methods).
 6. **Use only Java covered in the course** (ArrayList, enums, exceptions,
    interfaces, enhanced for, etc.). No Queue/LinkedList, records or Optional.
-7. **Record any AI help** in your own `docs/GAI_LOG_<initials>.md`.
+7. **Record any AI help you use for your GAI declaration.**
 
 ### Git workflow
 
