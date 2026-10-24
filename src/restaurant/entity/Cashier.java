@@ -17,6 +17,12 @@ public class Cashier {
      * @throws InvalidActionException if the customer cannot pay
      */
     public int collectPayment(Customer customer) throws InvalidActionException {
-        return 0; // TODO (C)
+        if(customer == null){
+            throw new InvalidActionException("There is no such customer");
+        }else if(customer.getStatus() != CustomerStatus.READY_TO_PAY){
+            throw new InvalidActionException("Customer is not ready to pay");
+        }else{
+            return customer.pay();
+        }
     }
 }

@@ -22,7 +22,18 @@ public class Waiter {
      * @throws InvalidActionException if the customer cannot be seated
      */
     public void seat(Customer customer, Table table) throws InvalidActionException {
-        // TODO (C): implement
+        if(customer == null){
+            throw new InvalidActionException("There is no such customer");
+        }else if(table == null){
+            throw new InvalidActionException("No table is free");
+        }else if(customer.getStatus() != CustomerStatus.WAITING){
+            String status = customer.getStatus().toString().toLowerCase();
+            throw new InvalidActionException("Customer is already " + status);
+        }else if(!table.isFree()){
+            throw new InvalidActionException("Table is not free");
+        }else{
+            table.seat(customer);
+        }
     }
 
     /**
@@ -37,7 +48,16 @@ public class Waiter {
      * @throws InvalidActionException if the order cannot be taken
      */
     public Order takeOrder(Customer customer, Menu menu) throws InvalidActionException {
-        return null; // TODO (C)
+        if(customer == null){
+            throw new InvalidActionException("There is no such customer");
+        }else if(customer.getStatus() != CustomerStatus.SEATED){
+            throw new InvalidActionException("Customer is not seated");
+        }else{
+            MenuItem item = customer.chooseItem(menu);
+            Order order = new Order(item);
+            customer.placeOrder(order);
+            return order;
+        }
     }
 
     /**
@@ -51,6 +71,27 @@ public class Waiter {
      * @throws InvalidActionException if the dish cannot be served
      */
     public void serve(Customer customer, int turn) throws InvalidActionException {
-        // TODO (C): implement
+        if(customer == null){
+            throw new InvalidActionException("There is no such customer");
+        }else if(customer.getStatus() != CustomerStatus.ORDERED){
+            throw new InvalidActionException("Customer didn't order");
+        }else{
+            Order order = customer.getOrder();
+            if(order.isReady()){
+                customer.receiveFood(turn);
+            }else{
+                MenuItem item=order.getItem();
+                throw new InvalidActionException(
+                    customer.toString() + 
+                    "'s " +
+                    item.getName() +
+                    " is not ready yet (" +
+                    order.getUnitsDone() + 
+                    "/" +
+                    item.getPrepUnits() +
+                    " units done)."
+                );
+            }
+        }
     }
 }
