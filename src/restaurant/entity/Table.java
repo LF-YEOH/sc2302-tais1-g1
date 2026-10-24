@@ -17,22 +17,22 @@ public class Table {
      * @param number the table number, starting from 1
      */
     public Table(int number) {
-        // TODO (B): implement
+        this.number = number;
     }
 
     /** @return the table number */
     public int getNumber() {
-        return 0; // TODO (B)
+        return this.number;
     }
 
     /** @return the customer at this table, or null if free */
     public Customer getOccupant() {
-        return null; // TODO (B)
+        return this.occupant;
     }
 
     /** @return true if no customer sits here */
     public boolean isFree() {
-        return false; // TODO (B)
+        return (occupant == null);
     }
 
     /**
@@ -43,11 +43,12 @@ public class Table {
      * @param customer the customer to seat
      */
     public void seat(Customer customer) {
-        // TODO (B): implement
+        this.occupant = customer;
+        customer.sitAt(this);
     }
 
     /** Frees the table (occupant = null). Called by Customer.pay() and Customer.leave(). */
     public void clear() {
-        // TODO (B): implement
+        this.occupant = null;
     }
 }

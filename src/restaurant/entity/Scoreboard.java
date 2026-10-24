@@ -29,42 +29,44 @@ public class Scoreboard {
      * @param satisfaction the customer's satisfaction when paying
      */
     public void recordPayment(int amountCents, int satisfaction) {
-        // TODO (B): implement
+        this.revenueCents += amountCents;
+        this.paidCount += 1;
+        this.totalPaidSatisfaction += satisfaction;
     }
 
     /** Records that one dish was served. */
     public void recordServed() {
-        // TODO (B): implement
+        this.servedCount += 1;
     }
 
     /** Records that one customer left without paying. */
     public void recordDeparture() {
-        // TODO (B): implement
+        this.departures += 1;
     }
 
     /** @return total revenue in cents */
     public int getRevenueCents() {
-        return 0; // TODO (B)
+        return this.revenueCents;
     }
 
     /** @return number of customers who have paid */
     public int getPaidCount() {
-        return 0; // TODO (B)
+        return this.paidCount;
     }
 
     /** @return number of dishes served */
     public int getServedCount() {
-        return 0; // TODO (B)
+        return this.servedCount; 
     }
 
     /** @return number of customers who left without paying */
     public int getDepartures() {
-        return 0; // TODO (B)
+        return this.departures;
     }
 
     /** @return true if at least one customer has paid */
     public boolean hasPaidCustomers() {
-        return false; // TODO (B)
+        return (this.paidCount > 0); 
     }
 
     /**
@@ -72,7 +74,7 @@ public class Scoreboard {
      *         paid yet (the UI shows "N/A" in that case, using hasPaidCustomers())
      */
     public double getAverageSatisfaction() {
-        return 0.0; // TODO (B)
+        return (hasPaidCustomers() ? (double)this.totalPaidSatisfaction/this.paidCount : 0.0); 
     }
 
     /**
@@ -81,6 +83,6 @@ public class Scoreboard {
      *         satisfaction >= 60
      */
     public boolean isVictory() {
-        return false; // TODO (B)
+        return (paidCount >= MIN_PAID && revenueCents >= MIN_REVENUE_CENTS && getAverageSatisfaction() >= MIN_AVG_SATISFACTION);
     }
 }
