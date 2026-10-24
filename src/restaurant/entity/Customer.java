@@ -30,37 +30,43 @@ public class Customer {
      * @param id the customer's number, starting from 1 (shown as "C1")
      */
     public Customer(int id) {
-        // TODO (A): implement
+        this.id = id;
+        this.satisfaction = START_SATISFACTION;
+        this.status = CustomerStatus.WAITING;
+        this.order = null;
+        this.table = null;
+        this.servedTurn = -1;
+        this.readyToPayTurn = -1;
     }
 
     /** @return the customer's number, e.g. 1 for "C1" */
     public int getId() {
-        return 0; // TODO (A)
+        return id; 
     }
 
     /** @return current satisfaction, from 0 to 100 */
     public int getSatisfaction() {
-        return 0; // TODO (A)
+        return satisfaction; 
     }
 
     /** @return the customer's current status */
     public CustomerStatus getStatus() {
-        return null; // TODO (A)
+        return status; 
     }
 
     /** @return the customer's order, or null if none has been placed */
     public Order getOrder() {
-        return null; // TODO (A)
+        return order;
     }
 
     /** @return the table the customer sits at, or null if not seated */
     public Table getTable() {
-        return null; // TODO (A)
+        return table;
     }
 
     /** @return the turn the customer became READY_TO_PAY, or -1 if not yet */
     public int getReadyToPayTurn() {
-        return 0; // TODO (A)
+        return readyToPayTurn;
     }
 
     /**
@@ -72,7 +78,8 @@ public class Customer {
      * @return the chosen menu item
      */
     public MenuItem chooseItem(Menu menu) {
-        return null; // TODO (A)
+        int itemNumber = (id - 1) % (menu.getNumItems());
+        return menu.getItem(itemNumber);
     }
 
     /**
@@ -83,7 +90,8 @@ public class Customer {
      * @param table the table the customer now sits at
      */
     public void sitAt(Table table) {
-        // TODO (A): implement
+        this.table = table;
+        this.status = CustomerStatus.SEATED;
     }
 
     /**
@@ -93,7 +101,8 @@ public class Customer {
      * @param order the newly created order
      */
     public void placeOrder(Order order) {
-        // TODO (A): implement
+        this.order = order;
+        this.status = CustomerStatus.ORDERED;
     }
 
     /**
@@ -104,7 +113,9 @@ public class Customer {
      * @param turn the current turn number
      */
     public void receiveFood(int turn) {
-        // TODO (A): implement
+        this.order.markServed();
+        this.servedTurn = turn;
+        this.status = CustomerStatus.EATING;
     }
 
     /**
@@ -117,7 +128,13 @@ public class Customer {
      * @return true if the customer became READY_TO_PAY this turn
      */
     public boolean finishEating(int turn) {
-        return false; // TODO (A)
+        if(this.servedTurn < turn && this.status == CustomerStatus.EATING){
+            this.status = CustomerStatus.READY_TO_PAY;
+            this.readyToPayTurn = turn;
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -129,7 +146,11 @@ public class Customer {
      * @return the bill in cents (the order's locked price)
      */
     public int pay() {
-        return 0; // TODO (A)
+        this.order.markPaid();
+        this.status = CustomerStatus.PAID;
+        this.table.clear();
+        this.table = null;
+        return this.order.getPriceCents();
     }
 
     /**
@@ -138,7 +159,11 @@ public class Customer {
      *         that is READY but not yet served)
      */
     public boolean isWaitingForService() {
-        return false; // TODO (A)
+        if(status == CustomerStatus.WAITING || status == CustomerStatus.SEATED || status == CustomerStatus.ORDERED){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -147,12 +172,18 @@ public class Customer {
      * Does nothing for customers who are eating, ready to pay, paid or left.
      */
     public void loseSatisfaction() {
-        // TODO (A): implement
+        if(isWaitingForService()){
+            satisfaction = Math.max((satisfaction - SATISFACTION_LOSS),0);
+        }
     }
 
     /** @return true if the customer is still waiting for service and satisfaction is 0 */
     public boolean hasRunOutOfPatience() {
-        return false; // TODO (A)
+       if(isWaitingForService() && satisfaction == 0){
+            return true;
+       }else{
+            return false;
+       }
     }
 
     /**
@@ -162,7 +193,14 @@ public class Customer {
      * The controller removes the customer from the waiting queue.
      */
     public void leave() {
-        // TODO (A): implement
+        if(order != null){
+            order.cancel();
+        }
+        if(table != null){
+            table.clear();
+            table = null;
+        }
+        status = CustomerStatus.LEFT;
     }
 
     /** @return the customer's label, e.g. "C3" */
