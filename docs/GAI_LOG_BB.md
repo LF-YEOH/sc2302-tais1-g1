@@ -2,7 +2,7 @@
 
 | Date | Tool | What I asked for | How I used the output |
 |---|---|---|---|
-| 25 Oct 2026 | Claude (Anthropic) | Asked some help implementing in TODO (D) method bodies in boundary/RestaurantUI.java from the skeleton comments and docs/team-briefs.md, and suggest a throwaway test. | Reviewed every method against its skeleton comment, ran the throwaway test (bad input such as "abc" and "9" is re-asked) and both replay files in `runs/`, then committed the file. I can explain each method for video segment 1. |
+| 25 Oct 2026 | Claude | Asked some help implementing in TODO (D) method bodies in boundary/RestaurantUI.java from the skeleton comments and docs/team-briefs.md, and suggest a throwaway test. | Reviewed every method against its skeleton comment, ran the throwaway test (bad input such as "abc" and "9" is re-asked) and both replay files in `runs/`, then committed the file. |
 
 ## What I checked myself
 - Method names, parameters and return types are unchanged from the skeleton.
