@@ -16,6 +16,13 @@ public class Chef {
      * @throws InvalidActionException if the order cannot be cooked
      */
     public void cook(Order order) throws InvalidActionException {
-        // TODO (C): implement
+        if(order == null){
+            throw new InvalidActionException("That customer has no order");
+        }else if(order.getStatus() != OrderStatus.PREPARING){
+            String status = order.getStatus().toString().toLowerCase();
+            throw new InvalidActionException("Order is already " + status);
+        }else{
+            order.addPreparationUnit();
+        }
     }
 }
