@@ -24,11 +24,11 @@ public class Waiter {
     public void seat(Customer customer, Table table) throws InvalidActionException {
         if(customer == null){
             throw new InvalidActionException("There is no such customer");
-        }else if(table == null){
-            throw new InvalidActionException("No table is free");
         }else if(customer.getStatus() != CustomerStatus.WAITING){
             String status = customer.getStatus().toString().toLowerCase();
             throw new InvalidActionException("Customer is already " + status);
+        }else if(table == null){
+            throw new InvalidActionException("No table is free");
         }else if(!table.isFree()){
             throw new InvalidActionException("Table is not free");
         }else{
@@ -74,7 +74,8 @@ public class Waiter {
         if(customer == null){
             throw new InvalidActionException("There is no such customer");
         }else if(customer.getStatus() != CustomerStatus.ORDERED){
-            throw new InvalidActionException("Customer didn't order");
+            String status = customer.getStatus().toString().toLowerCase();
+            throw new InvalidActionException("Customer has no dish waiting to be served (customer is " + status + ")");
         }else{
             Order order = customer.getOrder();
             if(order.isReady()){
