@@ -11,8 +11,8 @@ public class Order {
 
     private MenuItem item;
     private int priceCents;   // locked when the order is created
-    private int unitsDone;
-    private OrderStatus status;
+    private int unitsDone = 0;
+    private OrderStatus status = OrderStatus.PREPARING;
 
     /**
      * Creates a new order: locks the price at item.getPriceCents(),
@@ -21,32 +21,33 @@ public class Order {
      * @param item the menu item the customer chose
      */
     public Order(MenuItem item) {
-        // TODO (B): implement
+        this.item = item;
+        this.priceCents = item.getPriceCents();
     }
 
     /** @return the ordered menu item */
     public MenuItem getItem() {
-        return null; // TODO (B)
+        return this.item;
     }
 
     /** @return the bill for this order in cents */
     public int getPriceCents() {
-        return 0; // TODO (B)
+        return this.priceCents;
     }
 
     /** @return the number of preparation units completed */
     public int getUnitsDone() {
-        return 0; // TODO (B)
+        return this.unitsDone;
     }
 
     /** @return the order's current status */
     public OrderStatus getStatus() {
-        return null; // TODO (B)
+        return this.status; 
     }
 
     /** @return true if status is READY */
     public boolean isReady() {
-        return false; // TODO (B)
+        return (this.status == OrderStatus.READY); 
     }
 
     /**
@@ -55,17 +56,19 @@ public class Order {
      * Precondition (checked by Chef): status is PREPARING.
      */
     public void addPreparationUnit() {
-        // TODO (B): implement
+        this.unitsDone+=1;
+        if (this.unitsDone == this.item.getPrepUnits()) {this.status = OrderStatus.READY;}
     }
 
     /** Sets status to SERVED. Precondition: status is READY. */
     public void markServed() {
-        // TODO (B): implement
+        
+        this.status = OrderStatus.SERVED;
     }
 
     /** Sets status to PAID. Precondition: status is SERVED. */
     public void markPaid() {
-        // TODO (B): implement
+        this.status = OrderStatus.PAID;
     }
 
     /**
@@ -73,12 +76,12 @@ public class Order {
      * CANCELLED if it is PREPARING or READY; otherwise does nothing.
      */
     public void cancel() {
-        // TODO (B): implement
+        if (this.status == OrderStatus.PREPARING || this.status == OrderStatus.READY) {this.status = OrderStatus.CANCELLED;}
     }
 
     /** @return a readable summary, e.g. "Pasta 1/2 PREPARING" */
     @Override
     public String toString() {
-        return ""; // TODO (B)
+        return (this.item.getName() + " " + this.unitsDone + "/" + this.item.getPrepUnits() + " " + this.status);
     }
 }
