@@ -128,3 +128,81 @@ Because:  They share no operations or data: seat/takeOrder/serve, cook
           game needs to treat staff interchangeably.
 Cost:     If a shared staff behaviour appears later, a common type would
           have to be introduced then.
+
+## D10: Victory target checks live only in Scoreboard
+Context:  The result screen shows whether each of the three targets was
+          met. The first UI version kept its own copies of the targets and
+          re-checked them, so a game rule lived in the UI (brief 2.2:
+          "Keep rules out of the UI").
+Options:  (a) UI keeps copies of the targets and checks them itself
+          (b) Scoreboard checks each target; the UI only asks and displays
+Chose:    (b)
+Because:  - Each target rule now has one owner (SRP); isVictory() combines
+            isPaidTargetMet(), isRevenueTargetMet() and
+            isSatisfactionTargetMet().
+          - A changed target is updated in one place, not two that could
+            drift apart.
+          - The targets and MAX_TURNS are public constants, so the UI can
+            display them without duplicating them.
+Cost:     The UI depends on Scoreboard's and GameController's constants.
+          Found in code review of the UI pull request and refactored;
+          both replays print identical output before and after.
+
+## D11: How ambiguous parts of the brief were read
+Context:  The brief leaves some details open.
+Chose:    - Arrivals happen before the start-of-turn display, so the
+            manager sees the new customer when choosing (3.1 asks to show
+            the queue and the tasks available).
+          - The Waiter may seat any queued customer, not only the first:
+            4.1 says the player sets seating priority.
+          - The Waiter uses the lowest-numbered free table: tables are
+            identical, so choosing one would add input but no decision.
+          - Food choice: customer n orders menu item (n - 1) % 3, i.e.
+            C1 Salad, C2 Burger, C3 Pasta, ... (2.2: documented
+            deterministic rule; keeps runs reproducible).
+          - Input is checked in two layers: the UI rejects non-numbers and
+            out-of-range values (format); staff reject choices that break
+            game rules (with a reason).
+Because:  Each choice gives the player a decision only where it can change
+          the outcome, and keeps every run reproducible.
+Cost:     Other groups may read the brief differently; our readings are
+          documented here and in design-stage1.md.
+
+## D12: Replays through a plain Scanner instead of an input interface
+Context:  The brief asks for reproducible victory and defeat runs (4.1)
+          and allows an accelerated replay in the video (6.2).
+Options:  (a) An InputSource interface with keyboard and file versions
+          (b) Main builds a Scanner from System.in or from a file and
+              passes it to RestaurantUI
+Chose:    (b)
+Because:  Scanner already reads from both sources, so an extra interface
+          would add a class without real substitution. Only Main knows the
+          source; the UI just echoes lines when reading a file, and no
+          game logic changed to support replays.
+Cost:     Replay files hold bare numbers with no comments, so they are
+          hard to read on their own; their turns are described in the
+          test notes and video script.
+
+## D13: The waiting queue is an ArrayList, not a Queue
+Context:  Customers wait in arrival order before being seated.
+Options:  (a) java.util.Queue (first in, first out)
+          (b) ArrayList kept in arrival order
+Chose:    (b)
+Because:  Customers leave the line from anywhere: the manager may seat any
+          of them (D11), and impatient customers leave from any position.
+          A Queue is meant for taking from the front only. ArrayList is
+          also within the course material; Queue/LinkedList are not.
+Cost:     Nothing enforces arrival order except adding to the end.
+
+## D14: Table.seat() sets both sides of the table-customer link
+Context:  A table knows its customer and a customer knows its table; the
+          two must always agree.
+Options:  (a) Callers set table.occupant and customer.table separately
+          (b) Table.seat(customer) sets its occupant and calls
+              customer.sitAt(this); Customer.pay() and leave() clear the
+              table and forget it
+Chose:    (b)
+Because:  The two-way association is updated in one method, so no caller
+          can set one side and forget the other (encapsulation).
+Cost:     Table and Customer each know about the other (a bidirectional
+          association), which slightly increases coupling.
