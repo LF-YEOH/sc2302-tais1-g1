@@ -23,14 +23,14 @@ public class Waiter {
      */
     public void seat(Customer customer, Table table) throws InvalidActionException {
         if(customer == null){
-            throw new InvalidActionException("There is no such customer");
+            throw new InvalidActionException("There is no such customer.");
         }else if(customer.getStatus() != CustomerStatus.WAITING){
             String status = customer.getStatus().toString().toLowerCase();
-            throw new InvalidActionException("Customer is already " + status);
+            throw new InvalidActionException("Customer is already " + status + ".");
         }else if(table == null){
-            throw new InvalidActionException("No table is free");
+            throw new InvalidActionException("No table is free.");
         }else if(!table.isFree()){
-            throw new InvalidActionException("Table is not free");
+            throw new InvalidActionException("Table is not free.");
         }else{
             table.seat(customer);
         }
@@ -49,9 +49,9 @@ public class Waiter {
      */
     public Order takeOrder(Customer customer, Menu menu) throws InvalidActionException {
         if(customer == null){
-            throw new InvalidActionException("There is no such customer");
+            throw new InvalidActionException("There is no such customer.");
         }else if(customer.getStatus() != CustomerStatus.SEATED){
-            throw new InvalidActionException("Customer is not seated");
+            throw new InvalidActionException("Customer is not seated.");
         }else{
             MenuItem item = customer.chooseItem(menu);
             Order order = new Order(item);
@@ -72,10 +72,10 @@ public class Waiter {
      */
     public void serve(Customer customer, int turn) throws InvalidActionException {
         if(customer == null){
-            throw new InvalidActionException("There is no such customer");
+            throw new InvalidActionException("There is no such customer.");
         }else if(customer.getStatus() != CustomerStatus.ORDERED){
             String status = customer.getStatus().toString().toLowerCase();
-            throw new InvalidActionException("Customer has no dish waiting to be served (customer is " + status + ")");
+            throw new InvalidActionException("Customer has no dish waiting to be served (customer is " + status + ").");
         }else{
             Order order = customer.getOrder();
             if(order.isReady()){

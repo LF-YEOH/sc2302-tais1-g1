@@ -17,10 +17,10 @@ public class Chef {
      */
     public void cook(Order order) throws InvalidActionException {
         if(order == null){
-            throw new InvalidActionException("That customer has no order");
+            throw new InvalidActionException("That customer has no order.");
         }else if(order.getStatus() != OrderStatus.PREPARING){
             String status = order.getStatus().toString().toLowerCase();
-            throw new InvalidActionException("Order is already " + status);
+            throw new InvalidActionException("Order is already " + status + ".");
         }else{
             order.addPreparationUnit();
         }

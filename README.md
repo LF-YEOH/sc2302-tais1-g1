@@ -14,6 +14,11 @@ Requires a JDK (Java 17 or newer). From the repository root:
 
 The first line plays with the keyboard; the second plays back a saved run.
 
+## Tests
+
+Stage 1 tests are described in `docs/test-notes-stage1.md`. Each one is a
+replay file in `runs/`, e.g. `.\build.bat --replay runs\stage1-victory.txt`.
+
 ## Working on this project
 
 ### Structure (Boundary-Control-Entity)
