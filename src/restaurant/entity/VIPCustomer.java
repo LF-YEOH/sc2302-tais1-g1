@@ -31,8 +31,8 @@ public class VIPCustomer extends Customer {
 
     /**
      * @param priceCents the item's menu price in cents
-     * @return 90% of the price, rounded to the nearest cent
-     *         (use Money.applyPercent(priceCents, VIP_PRICE_PERCENT))
+     * @return 90% of the price, rounded to the nearest cent (Money has a
+     *         helper for percentages)
      */
     @Override
     public int getDiscountedPrice(int priceCents) {

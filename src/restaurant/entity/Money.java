@@ -26,7 +26,7 @@ public class Money {
      * Example: applyPercent(1800, 90) returns 1620; applyPercent(1500, 90)
      * returns 1350. Used for every discount, so rounding is done in one place.
      *
-     * TODO (B, Stage 2): implement, e.g. (int) Math.round(cents * percent / 100.0)
+     * TODO (B, Stage 2): implement. Delete this note when done.
      *
      * @param cents   an amount in cents
      * @param percent the percentage to keep, e.g. 90 for 10% off

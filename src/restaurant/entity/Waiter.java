@@ -47,12 +47,10 @@ public class Waiter {
      * @return the new order
      * @throws InvalidActionException if the order cannot be taken
      *
-     * TODO (B, Stage 2): the customer now decides its own price. Replace
-     *     new Order(item)
-     * with
-     *     int price = customer.getDiscountedPrice(item.getPriceCents());
-     *     new Order(item, price)
-     * The Waiter must not check the customer's type.
+     * TODO (B, Stage 2): the customer now decides its own price. Ask the
+     * customer for its price for the chosen item, and create the Order with
+     * that price using Order's new constructor. The Waiter must not check
+     * the customer's type. Delete this note when done.
      */
     public Order takeOrder(Customer customer, Menu menu) throws InvalidActionException {
         if(customer == null){

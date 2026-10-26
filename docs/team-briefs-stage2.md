@@ -20,14 +20,16 @@ Work on your own branch and open a pull request into `main`.
 Every `TODO (A)` in these files:
 - `Customer.adjustSatisfaction(amount)`: add `amount` (may be negative),
   keeping satisfaction within 0 to 100.
-- `Customer.loseSatisfaction()`: use `adjustSatisfaction(-getSatisfactionLoss())`
-  instead of the `SATISFACTION_LOSS` constant.
-- `Customer.pay()`: call `reactToService()` as the very first step.
-- `VIPCustomer`: loss 5, price `Money.applyPercent(priceCents, 90)`,
-  label `C3 [VIP]` (use `super.toString() + " [VIP]"`).
-- `CriticCustomer`: loss 12; `reactToService()`: satisfaction ≥ 50 →
-  `adjustSatisfaction(+20)`, otherwise `adjustSatisfaction(-20)`;
-  label `C2 [Critic]`.
+- `Customer.loseSatisfaction()`: use each customer's own loss rate
+  (`getSatisfactionLoss()`) instead of the `SATISFACTION_LOSS` constant.
+- `Customer.pay()`: the customer's reaction (`reactToService()`) must
+  happen before anything else.
+- `VIPCustomer`: loses 5 per waiting turn, pays 90% of the menu price
+  (rounded with B's `Money.applyPercent`), label like `C3 [VIP]`.
+- `CriticCustomer`: loses 12 per waiting turn; when paying, satisfaction
+  of 50 or more gains 20 (max 100), below 50 loses 20 (min 0); label like
+  `C2 [Critic]`.
+- **Delete each `TODO` note once it is done.**
 
 **Why it matters:** `getSatisfactionLoss()`, `getDiscountedPrice()`,
 `reactToService()` and `toString()` are overridden so the rest of the game
@@ -53,16 +55,16 @@ subclasses change it only through `adjustSatisfaction()`, which keeps it in
 (only the `takeOrder` change)
 
 Every `TODO (B)`:
-- `Money.applyPercent(cents, percent)`: return the percentage rounded to
-  the nearest cent, e.g. `(int) Math.round(cents * percent / 100.0)`.
-  `applyPercent(1800, 90)` is 1620; `applyPercent(1500, 90)` is 1350.
+- `Money.applyPercent(cents, percent)`: return the given percentage of
+  the amount, rounded to the nearest cent. `applyPercent(1800, 90)` is
+  1620; `applyPercent(1500, 90)` is 1350.
 - `Order`: replace `Order(MenuItem item)` with
   `Order(MenuItem item, int priceCents)`, which locks the given price.
   Throw `IllegalArgumentException` if `priceCents` is not positive. Update
   the constructor's comment to match.
-- `Waiter.takeOrder()`: replace `new Order(item)` with
-  `int price = customer.getDiscountedPrice(item.getPriceCents());`
-  `new Order(item, price)`. Remove the TODO comments once done.
+- `Waiter.takeOrder()`: ask the customer for its price for the chosen
+  item (`getDiscountedPrice`) and create the order with that price.
+- **Delete each `TODO` note once it is done.**
 
 **Why it matters:** the Waiter writes the price on the order once, when it
 is taken, and nothing can change it afterwards (brief §4.3: "The price is

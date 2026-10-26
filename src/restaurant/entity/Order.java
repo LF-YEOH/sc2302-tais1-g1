@@ -20,7 +20,8 @@ public class Order {
      * which locks the price passed in by the Waiter (the customer's price,
      * e.g. 90% for a VIP) instead of item.getPriceCents(). Throw
      * IllegalArgumentException if priceCents is not positive. Then update
-     * Waiter.takeOrder() to use it (see the TODO there).
+     * Waiter.takeOrder() to use it (see the TODO there). Delete this note
+     * when done.
      *
      * Creates a new order: locks the price at item.getPriceCents(),
      * sets unitsDone to 0 and status to PREPARING.
