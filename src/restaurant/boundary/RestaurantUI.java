@@ -3,6 +3,7 @@ package restaurant.boundary;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import restaurant.control.GameController;
 import restaurant.control.WaiterTask;
 import restaurant.entity.Customer;
 import restaurant.entity.Money;
@@ -21,14 +22,6 @@ import restaurant.entity.Table;
  * Owner: D
  */
 public class RestaurantUI {
-
-    // Display-only copies of the game's limits and targets, used in
-    // "Turn 4/18" and in the target lines of the result. The real rules
-    // live in GameController and Scoreboard.
-    private static final int MAX_TURNS = 18;
-    private static final int TARGET_PAID = 4;
-    private static final int TARGET_REVENUE_CENTS = 4500;
-    private static final int TARGET_AVG_SATISFACTION = 60;
 
     private static final String LINE = "==================================================";
 
@@ -49,18 +42,18 @@ public class RestaurantUI {
         System.out.println(LINE);
         System.out.println("                 RESTAURANT RUSH");
         System.out.println(LINE);
-        System.out.println("You manage a small restaurant with 2 tables for " + MAX_TURNS + " turns.");
+        System.out.println("You manage a small restaurant with 2 tables for " + GameController.MAX_TURNS + " turns.");
         System.out.println("Each turn you choose one task for the Waiter (seat a customer,");
         System.out.println("take an order or serve a dish) and one order for the Chef to");
         System.out.println("work on. Customers eat for a turn, then pay the Cashier.");
         System.out.println("Customers who are not yet served lose satisfaction every turn,");
         System.out.println("and leave without paying if it reaches 0.");
         System.out.println();
-        System.out.println("To win, by the end of turn " + MAX_TURNS + " you need:");
-        System.out.println("  - at least " + TARGET_PAID + " paying customers");
-        System.out.println("  - revenue of at least " + Money.format(TARGET_REVENUE_CENTS));
+        System.out.println("To win, by the end of turn " + GameController.MAX_TURNS + " you need:");
+        System.out.println("  - at least " + Scoreboard.MIN_PAID + " paying customers");
+        System.out.println("  - revenue of at least " + Money.format(Scoreboard.MIN_REVENUE_CENTS));
         System.out.println("  - average satisfaction of paying customers of at least "
-                + TARGET_AVG_SATISFACTION);
+                + Scoreboard.MIN_AVG_SATISFACTION);
         System.out.println();
     }
 
@@ -79,7 +72,7 @@ public class RestaurantUI {
     public void showTurnStart(int turn, Scoreboard board, ArrayList<Customer> queue,
                               ArrayList<Table> tables) {
         System.out.println();
-        System.out.println("==================== Turn " + turn + "/" + MAX_TURNS + " ====================");
+        System.out.println("==================== Turn " + turn + "/" + GameController.MAX_TURNS + " ====================");
         System.out.println("Revenue: " + Money.format(board.getRevenueCents())
                 + " | Avg satisfaction (paid): " + formatAverage(board));
 
@@ -198,7 +191,7 @@ public class RestaurantUI {
                 + " | Unhappy departures: " + board.getDepartures());
         System.out.println("Revenue: " + Money.format(board.getRevenueCents())
                 + " | Avg satisfaction (paid): " + formatAverage(board)
-                + " | Turns used: " + turn + "/" + MAX_TURNS);
+                + " | Turns used: " + turn + "/" + GameController.MAX_TURNS);
     }
 
     /**
@@ -211,21 +204,20 @@ public class RestaurantUI {
         // The overall result comes from the Scoreboard; the UI only shows it.
         String result = board.isVictory() ? "VICTORY!" : "DEFEAT";
 
-        boolean paidMet = board.getPaidCount() >= TARGET_PAID;
-        boolean revenueMet = board.getRevenueCents() >= TARGET_REVENUE_CENTS;
-        boolean satisfactionMet = board.hasPaidCustomers()
-                && board.getAverageSatisfaction() >= TARGET_AVG_SATISFACTION;
+        boolean paidMet = board.isPaidTargetMet();
+        boolean revenueMet = board.isRevenueTargetMet();
+        boolean satisfactionMet = board.isSatisfactionTargetMet();
 
         System.out.println();
         System.out.println(LINE);
         System.out.println("                    " + result);
         System.out.println(LINE);
         System.out.println(metLabel(paidMet) + "Paid customers: " + board.getPaidCount()
-                + " (target: " + TARGET_PAID + " or more)");
+                + " (target: " + Scoreboard.MIN_PAID + " or more)");
         System.out.println(metLabel(revenueMet) + "Revenue: " + Money.format(board.getRevenueCents())
-                + " (target: " + Money.format(TARGET_REVENUE_CENTS) + " or more)");
+                + " (target: " + Money.format(Scoreboard.MIN_REVENUE_CENTS) + " or more)");
         System.out.println(metLabel(satisfactionMet) + "Average satisfaction: " + formatAverage(board)
-                + " (target: " + TARGET_AVG_SATISFACTION + " or more)");
+                + " (target: " + Scoreboard.MIN_AVG_SATISFACTION + " or more)");
         System.out.println("Dishes served: " + board.getServedCount()
                 + " | Unhappy departures: " + board.getDepartures());
     }

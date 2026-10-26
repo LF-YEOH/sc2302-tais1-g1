@@ -9,11 +9,11 @@ package restaurant.entity;
 public class Scoreboard {
 
     /** Victory target: at least this many paid customers. */
-    private static final int MIN_PAID = 4;
+    public static final int MIN_PAID = 4;
     /** Victory target: at least this much revenue, in cents ($45.00). */
-    private static final int MIN_REVENUE_CENTS = 4500;
+    public static final int MIN_REVENUE_CENTS = 4500;
     /** Victory target: average satisfaction of paid customers at least this. */
-    private static final int MIN_AVG_SATISFACTION = 60;
+    public static final int MIN_AVG_SATISFACTION = 60;
 
     private int revenueCents;
     private int paidCount;
@@ -77,12 +77,23 @@ public class Scoreboard {
         return (hasPaidCustomers() ? (double)this.totalPaidSatisfaction/this.paidCount : 0.0); 
     }
 
-    /**
-     * @return true if ALL three targets are met: paidCount >= 4,
-     *         revenueCents >= 4500, and (someone has paid and) average
-     *         satisfaction >= 60
-     */
+    /** @return true if ALL three targets are met */
     public boolean isVictory() {
-        return (paidCount >= MIN_PAID && revenueCents >= MIN_REVENUE_CENTS && getAverageSatisfaction() >= MIN_AVG_SATISFACTION);
+        return isPaidTargetMet() && isRevenueTargetMet() && isSatisfactionTargetMet();
+    }
+
+    /** @return true if at least MIN_PAID customers have paid */
+    public boolean isPaidTargetMet() {
+        return paidCount >= MIN_PAID;
+    }
+
+    /** @return true if revenue is at least MIN_REVENUE_CENTS */
+    public boolean isRevenueTargetMet() {
+        return revenueCents >= MIN_REVENUE_CENTS;
+    }
+
+    /** @return true if someone has paid and their average satisfaction is at least MIN_AVG_SATISFACTION */
+    public boolean isSatisfactionTargetMet() {
+        return hasPaidCustomers() && getAverageSatisfaction() >= MIN_AVG_SATISFACTION;
     }
 }

@@ -37,7 +37,8 @@ import restaurant.entity.Waiter;
  */
 public class GameController {
 
-    private static final int MAX_TURNS = 18;
+    /** Number of turns in a game. Public so the UI can display it. */
+    public static final int MAX_TURNS = 18;
     private static final int NUM_TABLES = 2;
 
     private int turn;
