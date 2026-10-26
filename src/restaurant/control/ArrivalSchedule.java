@@ -20,7 +20,12 @@ public class ArrivalSchedule {
      * @return true if a customer arrives at the start of this turn
      */
     public boolean hasArrival(int turn) {
-        return false; // TODO (Lead)
+        for (int arrivalTurn : ARRIVAL_TURNS) {
+            if (arrivalTurn == turn) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -29,6 +34,8 @@ public class ArrivalSchedule {
      * @return a new customer with status WAITING and satisfaction 100
      */
     public Customer createCustomer() {
-        return null; // TODO (Lead)
+        Customer customer = new Customer(nextId);
+        nextId++;
+        return customer;
     }
 }
