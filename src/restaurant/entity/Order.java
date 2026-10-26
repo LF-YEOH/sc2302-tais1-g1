@@ -15,6 +15,13 @@ public class Order {
     private OrderStatus status = OrderStatus.PREPARING;
 
     /**
+     * TODO (B, Stage 2): replace this constructor with
+     *     public Order(MenuItem item, int priceCents)
+     * which locks the price passed in by the Waiter (the customer's price,
+     * e.g. 90% for a VIP) instead of item.getPriceCents(). Throw
+     * IllegalArgumentException if priceCents is not positive. Then update
+     * Waiter.takeOrder() to use it (see the TODO there).
+     *
      * Creates a new order: locks the price at item.getPriceCents(),
      * sets unitsDone to 0 and status to PREPARING.
      *

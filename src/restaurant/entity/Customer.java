@@ -1,10 +1,14 @@
 package restaurant.entity;
 
 /**
- * Represents one Regular customer. A customer knows its satisfaction, its
- * current status, its order and its table, and is the only class that
- * changes its own status. Staff classes check the game rules and then call
- * these methods.
+ * Represents a customer. A customer knows its satisfaction, its current
+ * status, its order and its table, and is the only class that changes its
+ * own status. Staff classes check the game rules and then call these methods.
+ *
+ * Customer objects are Regular customers. VIPCustomer and CriticCustomer
+ * extend this class and change its behaviour only by overriding
+ * getSatisfactionLoss(), getDiscountedPrice(), reactToService() and
+ * toString(), so no other class needs to check a customer's type.
  *
  * Owner: A
  */
@@ -138,10 +142,14 @@ public class Customer {
     }
 
     /**
-     * Pays the bill: marks the order PAID (order.markPaid()), sets status to
-     * PAID, frees the table (table.clear()) and forgets it (table = null).
-     * Satisfaction is NOT changed; the caller records it.
+     * Pays the bill: first calls reactToService() (a customer type may adjust
+     * its satisfaction here, e.g. a Critic), then marks the order PAID
+     * (order.markPaid()), sets status to PAID, frees the table (table.clear())
+     * and forgets it (table = null). The caller records getSatisfaction()
+     * after pay() returns, so any reaction is included.
      * Precondition (checked by Cashier): status is READY_TO_PAY.
+     *
+     * TODO (A, Stage 2): call reactToService() as the first step.
      *
      * @return the bill in cents (the order's locked price)
      */
@@ -168,8 +176,11 @@ public class Customer {
 
     /**
      * Applies one turn of waiting: if isWaitingForService(), lowers
-     * satisfaction by SATISFACTION_LOSS (8), but never below 0.
+     * satisfaction by getSatisfactionLoss(), but never below 0.
      * Does nothing for customers who are eating, ready to pay, paid or left.
+     *
+     * TODO (A, Stage 2): use adjustSatisfaction(-getSatisfactionLoss())
+     * instead of SATISFACTION_LOSS, so VIP and Critic losses apply.
      */
     public void loseSatisfaction() {
         if(isWaitingForService()){
@@ -201,6 +212,53 @@ public class Customer {
             table = null;
         }
         status = CustomerStatus.LEFT;
+    }
+
+    /**
+     * Satisfaction this customer loses for each turn spent waiting for
+     * service. Regular customers lose SATISFACTION_LOSS (8).
+     * Subclasses override this to change the rate (VIP 5, Critic 12).
+     *
+     * @return points lost per waiting turn
+     */
+    protected int getSatisfactionLoss() {
+        return SATISFACTION_LOSS;
+    }
+
+    /**
+     * The price this customer pays for a menu item, before any restaurant-wide
+     * pricing. Regular customers pay the full price. Called by the Waiter
+     * when taking the order; the result is locked into the Order.
+     * Subclasses override this to give a discount (VIP: 10% off).
+     *
+     * @param priceCents the item's menu price in cents
+     * @return the price this customer pays, in cents
+     */
+    public int getDiscountedPrice(int priceCents) {
+        return priceCents;
+    }
+
+    /**
+     * The customer's reaction to the service, applied when paying (called
+     * by pay() before the satisfaction is recorded). Regular and VIP
+     * customers do not react, so this does nothing.
+     * Subclasses override it to react (Critic: +20 or -20).
+     */
+    protected void reactToService() {
+        // Regular customers do not react.
+    }
+
+    /**
+     * Changes satisfaction by the given amount (negative to lower it),
+     * keeping it within 0 to 100. The only way subclasses can change
+     * satisfaction, so the 0-100 limits are always enforced here.
+     *
+     * TODO (A, Stage 2): implement.
+     *
+     * @param amount points to add (or subtract, if negative)
+     */
+    protected void adjustSatisfaction(int amount) {
+        // TODO (A): implement
     }
 
     /** @return the customer's label, e.g. "C3" */

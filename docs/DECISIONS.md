@@ -206,3 +206,103 @@ Because:  The two-way association is updated in one method, so no caller
           can set one side and forget the other (encapsulation).
 Cost:     Table and Customer each know about the other (a bidirectional
           association), which slightly increases coupling.
+
+## D15: VIP and Critic extend Customer, which stays the Regular customer
+Context:  Stage 2 adds VIP and Critic customers (brief 4.2). They follow
+          the same order and service flow as Regular customers but behave
+          differently in places.
+Options:  (a) VIPCustomer and CriticCustomer extend the existing Customer,
+              which remains the Regular customer
+          (b) Make Customer abstract and add RegularCustomer alongside
+              VIPCustomer and CriticCustomer
+Chose:    (a)
+Because:  - Customer is already a complete, working Regular customer; an
+            abstract parent with an empty RegularCustomer would add a class
+            with nothing in it.
+          - Keeps the change small: existing code that creates or uses
+            Customer is unaffected, and Regular behaviour is preserved
+            (the revision slides' "minimal modification").
+          - VIP and Critic are genuinely "a kind of customer" with different
+            behaviour, so inheritance fits (unlike Stage 1's menu items,
+            which differed only in values).
+Cost:     Customer means both "any customer" and "a Regular customer"; a
+          change meant only for Regular customers would also reach VIPs and
+          Critics unless they override it.
+
+## D16: Customer differences are overridden methods, never type checks
+Context:  Brief 4.2: "Different behaviour must be dispatched through the
+          customer objects, not through a chain of type checks in the turn
+          controller."
+Options:  (a) Check the type (instanceof) wherever behaviour differs
+          (b) Customer defines overridable methods; each subclass overrides
+              only what differs
+Chose:    (b)
+Because:  - getSatisfactionLoss() (8 / VIP 5 / Critic 12),
+            getDiscountedPrice() (VIP 90%), reactToService() (Critic) and
+            toString() (e.g. "C2 [Critic]") are chosen at run time by dynamic
+            binding (polymorphism). GameController, staff and UI never check
+            a customer's type, so a new customer type needs no change to them
+            (OCP).
+          - Values become methods because fields cannot be overridden: a
+            subclass cannot replace Customer's SATISFACTION_LOSS constant.
+          - Satisfaction stays private; subclasses change it only through
+            protected adjustSatisfaction(), which enforces the 0-100 limits
+            in one place (encapsulation).
+Cost:     Customer gains four small methods that Regular customers barely use.
+
+## D17: The Critic's reaction is a hook in the parent's pay() contract
+Context:  Our Critic behaviour (brief 4.2 lets us define it): when paying,
+          satisfaction of 50 or more gains 20 (good review, max 100); below
+          50 loses 20 (bad review, min 0). Combined with losing 12 per
+          waiting turn, it rewards fast service and punishes slow service.
+Options:  (a) CriticCustomer overrides pay() and changes satisfaction there
+          (b) Customer.pay() calls reactToService() first (does nothing for
+              Regular and VIP); CriticCustomer overrides reactToService()
+Chose:    (b)
+Because:  Customer.pay()'s Stage 1 contract promised "satisfaction is not
+          changed". Overriding pay() to change it would break the parent's
+          promise to its callers, violating LSP (a subtype must keep the
+          parent's contract). Instead the parent's contract was updated for
+          every customer: pay() may adjust satisfaction through
+          reactToService() before it is recorded. Every subtype then keeps
+          the same promise; only the reaction differs.
+Cost:     A Stage 1 method's contract had to change; documented in the
+          Stage 1 -> 2 change analysis.
+
+## D18: The Waiter locks the customer's price into the Order
+Context:  A VIP pays 10% less. Brief 4.3 later requires "Apply the VIP
+          discount first, then Happy Hour. The price is locked when the
+          order is taken."
+Options:  (a) Order reads the price from the item and a setter changes it
+              later
+          (b) The Waiter checks the customer's type and computes a discount
+          (c) The Waiter asks customer.getDiscountedPrice(menuPrice) and
+              passes the result to new Order(item, price)
+Chose:    (c)
+Because:  - Like a real waiter writing the price on the ticket, the Waiter
+            sets the price, but only when the order is created; the Order's
+            price can never change afterwards (no setter), so it stays
+            locked.
+          - The customer knows its own discount, so the Waiter needs no type
+            check (rejects b) and a new discount type changes only one
+            customer class.
+          - All percentage rounding goes through Money.applyPercent(), so
+            discounts round consistently (D3).
+Cost:     Order's constructor signature changed (Stage 1 -> 2 change).
+
+## D19: Arrival order, and where customer types are created
+Context:  Brief 4.2: a reproducible run must include at least one VIP and
+          one Critic; two Regular arrivals may be replaced; six arrivals.
+Chose:    C2 (turn 4) is the Critic and C3 (turn 7) is the VIP; the others
+          stay Regular.
+Because:  - The Critic arrives while the restaurant is still quiet, so the
+            manager has time to respond to its fast decline: a fair test of
+            the mechanic rather than a guaranteed loss. C2 orders a Burger
+            (1 unit), so fast service is possible.
+          - Customer 3 always orders the slow Pasta (2 units); the VIP's
+            slower decline (5 per turn) gives the kitchen time to cook it.
+          - ArrivalSchedule is the only class that names the concrete
+            customer types when creating them. Creation must name a class
+            somewhere; after creation nothing checks the type (the SOLID
+            slides: OCP "does NOT mean never modify any code").
+Cost:     ArrivalSchedule changes whenever the arrival mix changes.
