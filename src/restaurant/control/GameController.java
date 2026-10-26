@@ -7,7 +7,11 @@ import restaurant.entity.Cashier;
 import restaurant.entity.Chef;
 import restaurant.entity.Customer;
 import restaurant.entity.CustomerStatus;
+import restaurant.entity.InvalidActionException;
 import restaurant.entity.Menu;
+import restaurant.entity.Money;
+import restaurant.entity.Order;
+import restaurant.entity.OrderStatus;
 import restaurant.entity.Scoreboard;
 import restaurant.entity.Table;
 import restaurant.entity.Waiter;
@@ -33,7 +37,8 @@ import restaurant.entity.Waiter;
  */
 public class GameController {
 
-    private static final int MAX_TURNS = 18;
+    /** Number of turns in a game. Public so the UI can display it. */
+    public static final int MAX_TURNS = 18;
     private static final int NUM_TABLES = 2;
 
     private int turn;
@@ -57,22 +62,62 @@ public class GameController {
      */
     public GameController(RestaurantUI ui) {
         this.ui = ui;
-        // TODO (Lead): create the other objects
+        menu = new Menu();
+        tables = new ArrayList<>();
+        for (int i = 1; i <= NUM_TABLES; i++) {
+            tables.add(new Table(i));
+        }
+        customers = new ArrayList<>();
+        waitingQueue = new ArrayList<>();
+        waiter = new Waiter();
+        chef = new Chef();
+        cashier = new Cashier();
+        scoreboard = new Scoreboard();
+        schedule = new ArrivalSchedule();
+        turn = 0;
     }
 
     /** Plays the whole game: welcome, turns 1 to MAX_TURNS, then the result. */
     public void run() {
-        // TODO (Lead): implement
+        ui.showWelcome();
+        for (turn = 1; turn <= MAX_TURNS; turn++) {
+            playTurn();
+        }
+        ui.showResult(scoreboard);
     }
 
     /** Plays one turn: arrival, display, Waiter, Chef, payment, eating, waiting, end-of-turn display. */
     private void playTurn() {
-        // TODO (Lead): implement
+        // Step 1: arrivals, then show the state the manager decides from
+        admitArrival();
+        ui.showTurnStart(turn, scoreboard, waitingQueue, tables);
+        ui.showAvailableTasks(customersWithStatus(CustomerStatus.WAITING),
+                customersWithStatus(CustomerStatus.SEATED),
+                customersWithOrderStatus(OrderStatus.READY),
+                customersWithOrderStatus(OrderStatus.PREPARING));
+
+        // Steps 2-3: the Waiter acts before the Chef
+        runWaiterStep();
+        runChefStep();
+
+        // Step 4: payment BEFORE eating, so nobody pays in the turn they finish eating
+        runPaymentStep();
+        runEatingStep();
+
+        // Step 5: waiting customers lose satisfaction; some may leave
+        runWaitingStep();
+
+        ui.showTurnEnd(turn, scoreboard);
     }
 
     /** Step 1: if a customer is scheduled this turn, create them and add them to customers and waitingQueue. */
     private void admitArrival() {
-        // TODO (Lead): implement
+        if (schedule.hasArrival(turn)) {
+            Customer customer = schedule.createCustomer();
+            customers.add(customer);
+            waitingQueue.add(customer);
+            ui.showMessage(customer + " arrives and joins the waiting queue.");
+        }
     }
 
     /**
@@ -83,7 +128,38 @@ public class GameController {
      * served dish on the scoreboard; TAKE_ORDER shows what was ordered.
      */
     private void runWaiterStep() {
-        // TODO (Lead): implement
+        while (true) {
+            WaiterTask task = ui.askWaiterTask();
+            if (task == WaiterTask.WAIT) {
+                ui.showMessage("The Waiter waits this turn.");
+                return;
+            }
+
+            Customer customer = findCustomer(ui.askCustomerId("Which customer? Enter id (e.g. 3 for C3): "));
+            try {
+                switch (task) {
+                    case SEAT:
+                        waiter.seat(customer, findFreeTable());
+                        waitingQueue.remove(customer);
+                        ui.showMessage(customer + " is seated at Table " + customer.getTable().getNumber() + ".");
+                        break;
+                    case TAKE_ORDER:
+                        waiter.takeOrder(customer, menu);
+                        ui.showOrderPlaced(customer);
+                        break;
+                    case SERVE:
+                        waiter.serve(customer, turn);
+                        scoreboard.recordServed();
+                        ui.showMessage(customer + " is served their " + customer.getOrder().getItem().getName() + ".");
+                        break;
+                    default:
+                        break;
+                }
+                return; // one successful task per turn
+            } catch (InvalidActionException e) {
+                ui.showError(e.getMessage()); // nothing changed; ask again
+            }
+        }
     }
 
     /**
@@ -91,7 +167,26 @@ public class GameController {
      * customer's order. Repeats while the Chef throws InvalidActionException.
      */
     private void runChefStep() {
-        // TODO (Lead): implement
+        while (true) {
+            int id = ui.askCustomerId("Chef: cook whose order? Enter id (0 = wait): ");
+            if (id == 0) {
+                ui.showMessage("The Chef waits this turn.");
+                return;
+            }
+
+            Customer customer = findCustomer(id);
+            Order order = null;
+            if (customer != null) {
+                order = customer.getOrder();
+            }
+            try {
+                chef.cook(order);
+                ui.showMessage("The Chef works on " + customer + "'s order: " + order + ".");
+                return; // one unit per turn
+            } catch (InvalidActionException e) {
+                ui.showError(e.getMessage()); // nothing changed; ask again
+            }
+        }
     }
 
     /**
@@ -100,12 +195,28 @@ public class GameController {
      * payment and their satisfaction.
      */
     private void runPaymentStep() {
-        // TODO (Lead): implement
+        Customer next = findNextToPay();
+        if (next == null) {
+            return;
+        }
+        try {
+            int bill = cashier.collectPayment(next);
+            scoreboard.recordPayment(bill, next.getSatisfaction());
+            ui.showMessage(next + " pays " + Money.format(bill) + " (satisfaction "
+                    + next.getSatisfaction() + ") and leaves. The table is free.");
+        } catch (InvalidActionException e) {
+            // Cannot happen: findNextToPay() only returns READY_TO_PAY customers.
+            ui.showError(e.getMessage());
+        }
     }
 
     /** Step 4b: every EATING customer is asked to finishEating(turn). */
     private void runEatingStep() {
-        // TODO (Lead): implement
+        for (Customer customer : customers) {
+            if (customer.finishEating(turn)) {
+                ui.showMessage(customer + " has finished eating and is ready to pay.");
+            }
+        }
     }
 
     /**
@@ -114,7 +225,15 @@ public class GameController {
      * recorded as departures.
      */
     private void runWaitingStep() {
-        // TODO (Lead): implement
+        for (Customer customer : customers) {
+            customer.loseSatisfaction();
+            if (customer.hasRunOutOfPatience()) {
+                customer.leave();
+                waitingQueue.remove(customer);
+                scoreboard.recordDeparture();
+                ui.showMessage(customer + " ran out of patience and left without paying.");
+            }
+        }
     }
 
     /**
@@ -122,12 +241,22 @@ public class GameController {
      * @return the customer with that id, or null if there is none
      */
     private Customer findCustomer(int id) {
-        return null; // TODO (Lead)
+        for (Customer customer : customers) {
+            if (customer.getId() == id) {
+                return customer;
+            }
+        }
+        return null;
     }
 
     /** @return the lowest-numbered free table, or null if all are occupied */
     private Table findFreeTable() {
-        return null; // TODO (Lead)
+        for (Table table : tables) {
+            if (table.isFree()) {
+                return table;
+            }
+        }
+        return null;
     }
 
     /**
@@ -135,7 +264,15 @@ public class GameController {
      *         (ties: smallest id), or null if nobody is ready to pay
      */
     private Customer findNextToPay() {
-        return null; // TODO (Lead)
+        Customer oldest = null;
+        for (Customer customer : customers) {  // customers are in id order
+            if (customer.getStatus() == CustomerStatus.READY_TO_PAY) {
+                if (oldest == null || customer.getReadyToPayTurn() < oldest.getReadyToPayTurn()) {
+                    oldest = customer;
+                }
+            }
+        }
+        return oldest;
     }
 
     /**
@@ -143,6 +280,27 @@ public class GameController {
      * @return all customers that currently have this status, in arrival order
      */
     private ArrayList<Customer> customersWithStatus(CustomerStatus status) {
-        return new ArrayList<>(); // TODO (Lead)
+        ArrayList<Customer> result = new ArrayList<>();
+        for (Customer customer : customers) {
+            if (customer.getStatus() == status) {
+                result.add(customer);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @param status the order status to look for
+     * @return all customers whose order currently has this status, in arrival order
+     */
+    private ArrayList<Customer> customersWithOrderStatus(OrderStatus status) {
+        ArrayList<Customer> result = new ArrayList<>();
+        for (Customer customer : customers) {
+            Order order = customer.getOrder();
+            if (order != null && order.getStatus() == status) {
+                result.add(customer);
+            }
+        }
+        return result;
     }
 }
