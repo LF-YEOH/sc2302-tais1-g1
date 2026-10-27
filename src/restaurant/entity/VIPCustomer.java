@@ -26,7 +26,7 @@ public class VIPCustomer extends Customer {
     /** @return VIP_SATISFACTION_LOSS (5) */
     @Override
     protected int getSatisfactionLoss() {
-        return 0; // TODO (A)
+        return VIP_SATISFACTION_LOSS;
     }
 
     /**
@@ -36,12 +36,12 @@ public class VIPCustomer extends Customer {
      */
     @Override
     public int getDiscountedPrice(int priceCents) {
-        return 0; // TODO (A)
+        return priceCents*VIP_PRICE_PERCENT/100; // TODO (A)
     }
 
     /** @return the customer's label with its type, e.g. "C3 [VIP]" */
     @Override
     public String toString() {
-        return ""; // TODO (A)
+        return "C"+this.getId()+" [VIP]"; // TODO (A)
     }
 }
