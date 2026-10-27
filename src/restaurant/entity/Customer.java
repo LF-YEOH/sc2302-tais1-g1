@@ -177,11 +177,10 @@ public class Customer {
      * Applies one turn of waiting: if isWaitingForService(), lowers
      * satisfaction by getSatisfactionLoss(), but never below 0.
      * Does nothing for customers who are eating, ready to pay, paid or left.
-     *
      */
     public void loseSatisfaction() {
         if(isWaitingForService()){
-            adjustSatisfaction(-getSatisfactionLoss());;
+            adjustSatisfaction(-getSatisfactionLoss());
         }
     }
 
@@ -249,7 +248,6 @@ public class Customer {
      * Changes satisfaction by the given amount (negative to lower it),
      * keeping it within 0 to 100. The only way subclasses can change
      * satisfaction, so the 0-100 limits are always enforced here.
-     *
      *
      * @param amount points to add (or subtract, if negative)
      */

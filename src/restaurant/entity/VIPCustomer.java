@@ -36,12 +36,12 @@ public class VIPCustomer extends Customer {
      */
     @Override
     public int getDiscountedPrice(int priceCents) {
-        return priceCents*VIP_PRICE_PERCENT/100; // TODO (A)
+        return Money.applyPercent(priceCents,VIP_PRICE_PERCENT);
     }
 
     /** @return the customer's label with its type, e.g. "C3 [VIP]" */
     @Override
     public String toString() {
-        return "C"+this.getId()+" [VIP]"; // TODO (A)
+        return super.toString() +" [VIP]";
     }
 }
