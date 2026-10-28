@@ -149,12 +149,10 @@ public class Customer {
      * after pay() returns, so any reaction is included.
      * Precondition (checked by Cashier): status is READY_TO_PAY.
      *
-     * TODO (A, Stage 2): make pay() trigger the customer's reaction before
-     * anything else, as described above. Delete this note when done.
-     *
      * @return the bill in cents (the order's locked price)
      */
     public int pay() {
+        reactToService();
         this.order.markPaid();
         this.status = CustomerStatus.PAID;
         this.table.clear();
@@ -179,14 +177,10 @@ public class Customer {
      * Applies one turn of waiting: if isWaitingForService(), lowers
      * satisfaction by getSatisfactionLoss(), but never below 0.
      * Does nothing for customers who are eating, ready to pay, paid or left.
-     *
-     * TODO (A, Stage 2): stop using the SATISFACTION_LOSS constant here, so
-     * each customer type's own loss rate applies, and keep satisfaction
-     * within limits. Delete this note when done.
      */
     public void loseSatisfaction() {
         if(isWaitingForService()){
-            satisfaction = Math.max((satisfaction - SATISFACTION_LOSS),0);
+            adjustSatisfaction(-getSatisfactionLoss());
         }
     }
 
@@ -255,12 +249,11 @@ public class Customer {
      * keeping it within 0 to 100. The only way subclasses can change
      * satisfaction, so the 0-100 limits are always enforced here.
      *
-     * TODO (A, Stage 2): implement. Delete this note when done.
-     *
      * @param amount points to add (or subtract, if negative)
      */
     protected void adjustSatisfaction(int amount) {
-        // TODO (A): implement
+        satisfaction+=amount;
+        satisfaction = Math.max(0,Math.min(satisfaction,100));
     }
 
     /** @return the customer's label, e.g. "C3" */

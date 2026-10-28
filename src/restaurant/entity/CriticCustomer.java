@@ -31,7 +31,7 @@ public class CriticCustomer extends Customer {
     /** @return CRITIC_SATISFACTION_LOSS (12) */
     @Override
     protected int getSatisfactionLoss() {
-        return 0; // TODO (A)
+        return CRITIC_SATISFACTION_LOSS;
     }
 
     /**
@@ -42,12 +42,16 @@ public class CriticCustomer extends Customer {
      */
     @Override
     protected void reactToService() {
-        // TODO (A): implement
+        if(this.getSatisfaction() >= REVIEW_THRESHOLD){
+            adjustSatisfaction(REVIEW_EFFECT);
+        }else{
+            adjustSatisfaction(-REVIEW_EFFECT);
+        }
     }
 
     /** @return the customer's label with its type, e.g. "C2 [Critic]" */
     @Override
     public String toString() {
-        return ""; // TODO (A)
+        return super.toString() + " [Critic]";
     }
 }
