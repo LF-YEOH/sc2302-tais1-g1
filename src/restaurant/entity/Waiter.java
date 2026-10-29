@@ -38,19 +38,16 @@ public class Waiter {
 
     /**
      * Takes a seated customer's order: the customer chooses an item
-     * (customer.chooseItem(menu)), a new Order is created for it and given
-     * to the customer (customer.placeOrder(order)).
+     * (customer.chooseItem(menu)) and states its price for it
+     * (customer.getDiscountedPrice(...)); a new Order is created with that
+     * price locked in and given to the customer (customer.placeOrder(order)).
+     * The Waiter never checks what type of customer it is serving.
      * Refuses if customer is null or the customer's status is not SEATED.
      *
      * @param customer the customer ordering
      * @param menu     the restaurant's menu
      * @return the new order
      * @throws InvalidActionException if the order cannot be taken
-     *
-     * TODO (B, Stage 2): the customer now decides its own price. Ask the
-     * customer for its price for the chosen item, and create the Order with
-     * that price using Order's new constructor. The Waiter must not check
-     * the customer's type. Delete this note when done.
      */
     public Order takeOrder(Customer customer, Menu menu) throws InvalidActionException {
         if(customer == null){
@@ -59,7 +56,8 @@ public class Waiter {
             throw new InvalidActionException("Customer is not seated.");
         }else{
             MenuItem item = customer.chooseItem(menu);
-            Order order = new Order(item);
+            int price = customer.getDiscountedPrice(item.getPriceCents());
+            Order order = new Order(item, price);
             customer.placeOrder(order);
             return order;
         }

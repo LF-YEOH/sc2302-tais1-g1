@@ -15,22 +15,21 @@ public class Order {
     private OrderStatus status = OrderStatus.PREPARING;
 
     /**
-     * TODO (B, Stage 2): replace this constructor with
-     *     public Order(MenuItem item, int priceCents)
-     * which locks the price passed in by the Waiter (the customer's price,
-     * e.g. 90% for a VIP) instead of item.getPriceCents(). Throw
-     * IllegalArgumentException if priceCents is not positive. Then update
-     * Waiter.takeOrder() to use it (see the TODO there). Delete this note
-     * when done.
+     * Creates a new order and locks its price. The price is decided by the
+     * Waiter when the order is taken (the customer's price for the item,
+     * e.g. 90% for a VIP) and can never change afterwards. unitsDone starts
+     * at 0 and status at PREPARING.
      *
-     * Creates a new order: locks the price at item.getPriceCents(),
-     * sets unitsDone to 0 and status to PREPARING.
-     *
-     * @param item the menu item the customer chose
+     * @param item       the menu item the customer chose
+     * @param priceCents the price this customer pays, in cents
+     * @throws IllegalArgumentException if priceCents is not positive
      */
-    public Order(MenuItem item) {
+    public Order(MenuItem item, int priceCents) {
+        if (priceCents <= 0) {
+            throw new IllegalArgumentException("Order price must be positive: " + priceCents);
+        }
         this.item = item;
-        this.priceCents = item.getPriceCents();
+        this.priceCents = priceCents;
     }
 
     /** @return the ordered menu item */
