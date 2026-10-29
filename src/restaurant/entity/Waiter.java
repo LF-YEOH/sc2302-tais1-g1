@@ -6,6 +6,10 @@ package restaurant.entity;
  * rules first and throws InvalidActionException, without changing
  * anything, if the task is not allowed.
  *
+ * TODO (C, Stage 3): make Waiter extend SeatingStaff and delete seat()
+ * below, so the Waiter and the Host share one copy of the seating rules
+ * (see DECISIONS.md D20). Delete this note when done.
+ *
  * Owner: C
  */
 public class Waiter {
@@ -46,10 +50,17 @@ public class Waiter {
      *
      * @param customer the customer ordering
      * @param menu     the restaurant's menu
+     * @param pricing  the restaurant-wide pricing for orders taken now
+     *                 (standard, or Happy Hour)
      * @return the new order
      * @throws InvalidActionException if the order cannot be taken
+     *
+     * TODO (C, Stage 3): the price locked into the Order must be the
+     * customer's price with the given pricing applied on top (the customer's
+     * discount first, then the pricing policy). The Waiter must not check
+     * whether Happy Hour is active. Delete this note when done.
      */
-    public Order takeOrder(Customer customer, Menu menu) throws InvalidActionException {
+    public Order takeOrder(Customer customer, Menu menu, PricingPolicy pricing) throws InvalidActionException {
         if(customer == null){
             throw new InvalidActionException("There is no such customer.");
         }else if(customer.getStatus() != CustomerStatus.SEATED){

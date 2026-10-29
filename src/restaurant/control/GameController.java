@@ -7,6 +7,8 @@ import restaurant.entity.Cashier;
 import restaurant.entity.Chef;
 import restaurant.entity.Customer;
 import restaurant.entity.CustomerStatus;
+import restaurant.entity.HappyHour;
+import restaurant.entity.Host;
 import restaurant.entity.InvalidActionException;
 import restaurant.entity.Menu;
 import restaurant.entity.Money;
@@ -23,7 +25,9 @@ import restaurant.entity.Waiter;
  *
  * Turn steps:
  *   1. Arrivals: the scheduled customer joins the waiting queue.
- *      (Then the start-of-turn state is displayed.)
+ *      (Then the start-of-turn state is displayed.) Happy Hour may be
+ *      activated, and during Happy Hour waiting customers recover.
+ *   Host: seats one queued customer, before the Waiter acts.
  *   2-3. Manager choices: the Waiter acts first, then the Chef. An invalid
  *      choice shows the reason and asks again without using up the task.
  *   4. Payment, then eating: the Cashier charges the oldest customer who was
@@ -47,11 +51,13 @@ public class GameController {
     private ArrayList<Table> tables;
     private ArrayList<Customer> customers;     // everyone who has arrived
     private ArrayList<Customer> waitingQueue;  // arrived but not yet seated, in arrival order
+    private Host host;
     private Waiter waiter;
     private Chef chef;
     private Cashier cashier;
     private Scoreboard scoreboard;
     private ArrivalSchedule schedule;
+    private HappyHour happyHour;
 
     /**
      * Sets up a new game: creates the menu, NUM_TABLES tables numbered from 1,
@@ -69,11 +75,13 @@ public class GameController {
         }
         customers = new ArrayList<>();
         waitingQueue = new ArrayList<>();
+        host = new Host();
         waiter = new Waiter();
         chef = new Chef();
         cashier = new Cashier();
         scoreboard = new Scoreboard();
         schedule = new ArrivalSchedule();
+        happyHour = new HappyHour();
         turn = 0;
     }
 
@@ -91,10 +99,19 @@ public class GameController {
         // Step 1: arrivals, then show the state the manager decides from
         admitArrival();
         ui.showTurnStart(turn, scoreboard, waitingQueue, tables);
+        ui.showHappyHourStatus(happyHour);
+
+        // Turn start: Happy Hour may be activated, then waiting customers recover
+        offerHappyHour();
+        applyHappyHourRecovery();
+
         ui.showAvailableTasks(customersWithStatus(CustomerStatus.WAITING),
                 customersWithStatus(CustomerStatus.SEATED),
                 customersWithOrderStatus(OrderStatus.READY),
                 customersWithOrderStatus(OrderStatus.PREPARING));
+
+        // Host seats before the Waiter, so the Waiter can take that customer's order this turn
+        runHostStep();
 
         // Steps 2-3: the Waiter acts before the Chef
         runWaiterStep();
@@ -107,6 +124,7 @@ public class GameController {
         // Step 5: waiting customers lose satisfaction; some may leave
         runWaitingStep();
 
+        happyHour.endTurn();
         ui.showTurnEnd(turn, scoreboard);
     }
 
@@ -117,6 +135,59 @@ public class GameController {
             customers.add(customer);
             waitingQueue.add(customer);
             ui.showMessage(customer + " arrives and joins the waiting queue.");
+        }
+    }
+
+    /**
+     * Turn start: if Happy Hour has not been used, asks the manager whether to
+     * activate it now. It then lasts for this turn and the next.
+     */
+    private void offerHappyHour() {
+        if (happyHour.canActivate() && ui.askActivateHappyHour()) {
+            try {
+                happyHour.activate();
+                ui.showMessage("Happy Hour starts! 20% off new orders this turn and next.");
+            } catch (InvalidActionException e) {
+                ui.showError(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Turn start: during each active Happy Hour turn, every customer still
+     * waiting for a table or food recovers HappyHour.RECOVERY satisfaction
+     * (up to 100).
+     */
+    private void applyHappyHourRecovery() {
+        if (happyHour.isActive()) {
+            for (Customer customer : customers) {
+                customer.recoverSatisfaction(HappyHour.RECOVERY);
+            }
+            ui.showMessage("Happy Hour: waiting customers recover " + HappyHour.RECOVERY + " satisfaction.");
+        }
+    }
+
+    /**
+     * Host step: asks which queued customer the Host should seat (0 = wait)
+     * and seats them. Repeats while the Host throws InvalidActionException.
+     * Runs before the Waiter's step.
+     */
+    private void runHostStep() {
+        while (true) {
+            int id = ui.askCustomerId("Host: seat which customer? Enter id (0 = wait): ");
+            if (id == 0) {
+                ui.showMessage("The Host waits this turn.");
+                return;
+            }
+            Customer customer = findCustomer(id);
+            try {
+                host.seat(customer, findFreeTable());
+                waitingQueue.remove(customer);
+                ui.showMessage("The Host seats " + customer + " at Table " + customer.getTable().getNumber() + ".");
+                return;
+            } catch (InvalidActionException e) {
+                ui.showError(e.getMessage());
+            }
         }
     }
 
@@ -144,7 +215,7 @@ public class GameController {
                         ui.showMessage(customer + " is seated at Table " + customer.getTable().getNumber() + ".");
                         break;
                     case TAKE_ORDER:
-                        waiter.takeOrder(customer, menu);
+                        waiter.takeOrder(customer, menu, happyHour.getCurrentPricing());
                         ui.showOrderPlaced(customer);
                         break;
                     case SERVE:

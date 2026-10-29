@@ -17,6 +17,10 @@ public class Menu {
         items.add(new MenuItem("Salad", 900, 1));
         items.add(new MenuItem("Burger", 1500, 1));
         items.add(new MenuItem("Pasta", 1800, 2));
+        // TODO (D, Stage 3): add the three combos after the dishes, in this
+        // order: Salad + Burger, Salad + Pasta, Burger + Pasta. Build each
+        // from the dish objects above. Update this class's comments to
+        // mention the combos. Delete this note when done.
     }
 
     /** @return the number of items on the menu */

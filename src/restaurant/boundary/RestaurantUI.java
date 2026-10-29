@@ -6,6 +6,7 @@ import java.util.Scanner;
 import restaurant.control.GameController;
 import restaurant.control.WaiterTask;
 import restaurant.entity.Customer;
+import restaurant.entity.HappyHour;
 import restaurant.entity.Money;
 import restaurant.entity.Order;
 import restaurant.entity.Scoreboard;
@@ -141,6 +142,25 @@ public class RestaurantUI {
             default:
                 return WaiterTask.WAIT;
         }
+    }
+
+    /**
+     * Asks whether to activate Happy Hour this turn: 1 = yes, 0 = no.
+     *
+     * @return true if the manager chose to activate it
+     */
+    public boolean askActivateHappyHour() {
+        return false; // TODO (D): implement. Delete this note when done.
+    }
+
+    /**
+     * Prints Happy Hour's status, e.g. "Happy Hour: available",
+     * "Happy Hour: ACTIVE (2 turns left)" or "Happy Hour: used".
+     *
+     * @param happyHour the game's Happy Hour
+     */
+    public void showHappyHourStatus(HappyHour happyHour) {
+        // TODO (D): implement. Delete this note when done.
     }
 
     /**

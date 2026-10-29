@@ -184,6 +184,18 @@ public class Customer {
         }
     }
 
+    /**
+     * Happy Hour recovery: if isWaitingForService(), raises satisfaction by
+     * the given amount, up to 100. Does nothing for other customers.
+     *
+     * @param amount points to recover
+     */
+    public void recoverSatisfaction(int amount) {
+        if (isWaitingForService()) {
+            adjustSatisfaction(amount);
+        }
+    }
+
     /** @return true if the customer is still waiting for service and satisfaction is 0 */
     public boolean hasRunOutOfPatience() {
        if(isWaitingForService() && satisfaction == 0){

@@ -306,3 +306,94 @@ Because:  - The Critic arrives while the restaurant is still quiet, so the
             somewhere; after creation nothing checks the type (the SOLID
             slides: OCP "does NOT mean never modify any code").
 Cost:     ArrivalSchedule changes whenever the arrival mix changes.
+
+## D20: Host and Waiter share an abstract SeatingStaff parent (revisits D9)
+Context:  Stage 3 adds a Host who seats customers with exactly the same
+          rules as the Waiter (brief 4.3). In Stage 1, D9 rejected a shared
+          Staff type because the staff shared no operations. Seating is now a
+          genuinely shared behaviour.
+Options:  (a) Duplicate the seating checks in Host
+          (b) Host extends Waiter
+          (c) Waiter extends Host
+          (d) Abstract SeatingStaff holding seat(); Host and Waiter extend it
+Chose:    (d)
+Because:  - One copy of the seating rules, used by both roles.
+          - (b) breaks LSP: a Host would inherit takeOrder() and serve(),
+            which it cannot do (the Bird/Penguin case in the SOLID slides).
+          - (c) keeps LSP but claims "a Waiter is a kind of Host", which does
+            not match how people think about these roles; the course models
+            the real world the way people think about it.
+          - Named SeatingStaff, not Staff: the Chef and Cashier cannot seat,
+            so they stay outside it (ISP, as in D9).
+          - Host adds no methods, but it is a distinct role the controller
+            holds and gives its own task each turn.
+Cost:     Host is an empty subclass; D9's "no shared staff type" is
+          partly reversed, which is documented in the Stage 2 -> 3 analysis.
+
+## D21: The Host acts before the Waiter
+Context:  The brief does not say when the Host acts within a turn.
+Chose:    Host first, then Waiter, then Chef.
+Because:  A customer the Host seats can have their order taken by the
+          Waiter in the same turn, so the Host genuinely speeds up service.
+          With two free tables, Host and Waiter can each seat someone in
+          one turn ("in addition to the Waiter's task").
+Cost:     One more choice for the manager each turn (the Host may wait).
+
+## D22: ComboMeal is a MenuItem made of two MenuItems (revisits D2)
+Context:  "A combo is made of two existing menu items"; units are the sum,
+          price is 90% of the combined price (brief 4.3).
+Options:  (a) Change MenuItem into an interface or abstract class
+          (b) ComboMeal extends the existing MenuItem and holds its two parts
+Chose:    (b)
+Because:  - A combo "is a" menu item (orders, the Chef and the Waiter handle
+            it like any dish: polymorphism) and "has" two menu items.
+          - ComboMeal computes its name, price and units from its parts and
+            passes them to MenuItem's constructor, so MenuItem itself did not
+            need to change: D2's simple Stage 1 class held up.
+          - The parts are the menu's existing dish objects, which exist on
+            their own and can be shared by several combos, so this is an
+            aggregation (Menu -> MenuItem remains the composition).
+          - Price uses Money.applyPercent, so rounding is consistent (D3).
+          - All three pairs are offered, after the three dishes. The food-
+            choice rule (n - 1) % menu size is unchanged: C1-C3 order exactly
+            what they did in Stage 2, and C4/C5 order combos.
+Cost:     Adding combos changes what later customers order compared with
+          Stage 2 (documented in the change analysis).
+
+## D23: Happy Hour is an entity; turn start is arrival, display, offer, recovery
+Context:  Happy Hour can be activated once, at the start of a turn, lasts
+          that turn and the next, and its remaining duration must be shown.
+          During each active turn, customers waiting for a table or food
+          recover 15 satisfaction at turn start (max 100).
+Chose:    - HappyHour (entity) holds its state and rules: canActivate(),
+            activate() (refuses a second use), isActive(),
+            getTurnsRemaining(), endTurn() for the countdown.
+          - Turn start: arrival -> display (including Happy Hour status) ->
+            offer Happy Hour if unused -> recovery if active.
+          - Customer.recoverSatisfaction(amount) applies the +15 only to
+            customers still waiting for service, using adjustSatisfaction()
+            so the 0-100 limits hold (D16).
+Because:  The manager sees the newcomer and the restaurant before deciding,
+          and the activation turn itself gets the recovery. The UI only
+          displays Happy Hour's status; the rules stay in the entity (2.2).
+Cost:     One extra prompt per turn until Happy Hour is used.
+
+## D24: Pricing policies behind an interface (DIP, OCP)
+Context:  Orders taken during Happy Hour get 20% off, applied after the VIP
+          discount, and the price is locked when the order is taken.
+Options:  (a) The Waiter checks if Happy Hour is active
+          (b) HappyHour.applyTo(price) decides
+          (c) A PricingPolicy interface with StandardPricing and
+              HappyHourPricing; the Waiter is given the current policy
+Chose:    (c)
+Because:  - There are now two interchangeable ways of pricing, which is when
+            the course says an interface is meaningful.
+          - The Waiter depends on the PricingPolicy abstraction, not on Happy
+            Hour (DIP, like OrderService -> Notifier in the slides): it
+            applies the policy to the customer's own price, so the VIP
+            discount comes first ($15 x 0.9 x 0.8 = $10.80).
+          - A new promotion is a new PricingPolicy class with no change to
+            the Waiter (OCP). HappyHour supplies the policy for the current
+            turn; the price is still locked into the Order (D18).
+Cost:     Three small classes for what (b) does in one method; (b) was the
+          simpler alternative considered.
