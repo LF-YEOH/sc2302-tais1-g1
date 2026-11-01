@@ -3,7 +3,8 @@ package restaurant.entity;
 import java.util.ArrayList;
 
 /**
- * Represents the restaurant's menu: Salad, Burger and Pasta.
+ * Represents the restaurant's menu: Salad, Burger and Pasta, followed by
+ * the three combos of two different dishes.
  * The menu creates and owns its items (composition), and only lets
  * other classes read them, never add or remove them.
  */
@@ -11,16 +12,19 @@ public class Menu {
 
     private ArrayList<MenuItem> items;
 
-    /** Creates the base menu with its three items, in menu order. */
+    /** Creates the menu: the three dishes, then the three combos, in menu order. */
     public Menu() {
         items = new ArrayList<>();
         items.add(new MenuItem("Salad", 900, 1));
         items.add(new MenuItem("Burger", 1500, 1));
         items.add(new MenuItem("Pasta", 1800, 2));
-        // TODO (D, Stage 3): add the three combos after the dishes, in this
-        // order: Salad + Burger, Salad + Pasta, Burger + Pasta. Build each
-        // from the dish objects above. Update this class's comments to
-        // mention the combos. Delete this note when done.
+
+        MenuItem salad = items.get(0);
+        MenuItem burger = items.get(1);
+        MenuItem pasta = items.get(2);
+        items.add(new ComboMeal(salad, burger));
+        items.add(new ComboMeal(salad, pasta));
+        items.add(new ComboMeal(burger, pasta));
     }
 
     /** @return the number of items on the menu */

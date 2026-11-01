@@ -26,9 +26,10 @@ public class ComboMeal extends MenuItem {
      * @param secondItem the second item in the combo
      */
     public ComboMeal(MenuItem firstItem, MenuItem secondItem) {
-        // TODO (D): pass the combo's name, price and preparation units to
-        // MenuItem's constructor, as described above. Delete this note when done.
-        super(firstItem.getName() + " + " + secondItem.getName(), 1, 1);
+        super(firstItem.getName() + " + " + secondItem.getName(),
+                Money.applyPercent(firstItem.getPriceCents() + secondItem.getPriceCents(),
+                        COMBO_PRICE_PERCENT),
+                firstItem.getPrepUnits() + secondItem.getPrepUnits());
         this.firstItem = firstItem;
         this.secondItem = secondItem;
     }

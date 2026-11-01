@@ -150,7 +150,10 @@ public class RestaurantUI {
      * @return true if the manager chose to activate it
      */
     public boolean askActivateHappyHour() {
-        return false; // TODO (D): implement. Delete this note when done.
+        System.out.println("Activate Happy Hour now? (20% off new orders and +"
+                + HappyHour.RECOVERY + " satisfaction for waiting customers, for 2 turns; once per game)");
+        System.out.print("1 = Yes, 0 = No: ");
+        return readInt(0, 1) == 1;
     }
 
     /**
@@ -160,7 +163,16 @@ public class RestaurantUI {
      * @param happyHour the game's Happy Hour
      */
     public void showHappyHourStatus(HappyHour happyHour) {
-        // TODO (D): implement. Delete this note when done.
+        String status;
+        if (happyHour.isActive()) {
+            int left = happyHour.getTurnsRemaining();
+            status = "ACTIVE (" + left + (left == 1 ? " turn" : " turns") + " left, 20% off new orders)";
+        } else if (happyHour.canActivate()) {
+            status = "available";
+        } else {
+            status = "used";
+        }
+        System.out.println("Happy Hour: " + status);
     }
 
     /**
