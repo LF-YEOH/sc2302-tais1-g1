@@ -16,9 +16,11 @@ The first line plays with the keyboard; the second plays back a saved run.
 
 ## Tests
 
-Tests are described in `docs/test-notes-stage1.md` and
-`docs/test-notes-stage2.md`. Each one is a replay file in `runs/`, e.g.
-`.\build.bat --replay runs\stage2-victory.txt`.
+Tests are described in `docs/test-notes-stage1.md`,
+`docs/test-notes-stage2.md` and `docs/test-notes-stage3.md`. Each one is a
+replay file in `runs/`, e.g. `.\build.bat --replay runs\stage3-victory.txt`.
+Replays only run on the stage they were written for (each stage adds
+questions to a turn).
 
 ## Stage changes
 
@@ -54,6 +56,46 @@ polymorphism, with no type checks anywhere.
 default methods), the Stage 1 replays give exactly the Stage 1 results. The
 same victory inputs now give $64.20 and average 83.4 instead of $66.00 and
 79.2, because of the VIP discount and the Critic's review.
+
+### Stage 2 → Stage 3: Host, ComboMeal, Happy Hour
+
+Compare: https://github.com/LF-YEOH/sc2302-tais1-g1/compare/stage-2...stage-3
+Design: `docs/design-stage3.md`; decisions D20–D24 in `docs/DECISIONS.md`.
+
+**New files**
+
+| File | Purpose |
+|---|---|
+| `entity/SeatingStaff.java` | Abstract parent holding the seating rules, shared by the Host and the Waiter |
+| `entity/Host.java` | Seats one waiting customer per turn, before the Waiter acts |
+| `entity/ComboMeal.java` | A menu item made of two menu items: 90% of their total price, the sum of their preparation units |
+| `entity/HappyHour.java` | Once per game, lasts 2 turns, counts down; gives the current pricing |
+| `entity/PricingPolicy.java` | Interface for restaurant-wide pricing of new orders |
+| `entity/StandardPricing.java`, `entity/HappyHourPricing.java` | Normal price; 80% of the price |
+| `runs/stage3-*.txt`, `docs/test-notes-stage3.md` | Stage 3 replays and test notes |
+
+**Changed files, and why**
+
+| File | Change | Why it was necessary |
+|---|---|---|
+| `entity/Waiter.java` | Extends `SeatingStaff` (its `seat()` moved there); `takeOrder()` takes a `PricingPolicy` and applies it after the customer's own price | The Host needs exactly the Waiter's seating rules but must not inherit taking orders or serving (LSP), so the rules moved to a shared parent (D20, revisits D9). The Waiter depends on the pricing interface, not on Happy Hour (DIP, D24) |
+| `entity/Menu.java` | Adds the three combos after the dishes | Combos are menu items, so the Menu holds them like any other item (D22) |
+| `entity/Customer.java` | Added `recoverSatisfaction()` | Happy Hour's +15 applies only to customers waiting for service, and only the customer knows its own status (D23) |
+| `control/GameController.java` | Owns the Host and Happy Hour; turn order is now arrival, display, Happy Hour offer, recovery, Host, Waiter, Chef, ..., Happy Hour countdown | The controller decides the turn order (D21, D23) |
+| `boundary/RestaurantUI.java` | Asks whether to activate Happy Hour; shows its status each turn | Input and output stay in the boundary; the rules stay in `HappyHour` (D23) |
+
+**Unchanged:** `Order`, `Chef`, `Cashier`, `Table`, `Scoreboard`,
+`MenuItem`, `VIPCustomer`, `CriticCustomer`, `Money`, `ArrivalSchedule`.
+Combos needed no change to `Order` or the `Chef`, because a `ComboMeal` is a
+`MenuItem`: its name, price and units come through the same methods. The
+customer's food-choice rule is also unchanged; with six menu items, C4–C6
+now order the combos.
+
+**Earlier behaviour still works:** customers keep their Stage 2 behaviour
+(loss rates, VIP discount, Critic review), and invalid choices are refused
+with the same messages. The Stage 1 and 2 replay files no longer run, since
+each turn now asks two extra questions (Happy Hour and the Host); the same
+behaviour is checked in the Stage 3 tests instead.
 
 ## Working on this project
 
