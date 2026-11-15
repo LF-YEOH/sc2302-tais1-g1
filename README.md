@@ -3,6 +3,31 @@
 SC2002 group assignment: a turn-based restaurant management game in Java,
 built in three stages (tags `stage-1`, `stage-2`, `stage-3`).
 
+**Repository:** https://github.com/LF-YEOH/sc2302-tais1-g1
+
+## Stages
+
+| Stage | Tag | Features added |
+|---|---|---|
+| 1 | [`stage-1`](https://github.com/LF-YEOH/sc2302-tais1-g1/tree/stage-1) | Core game: arrivals, Waiter, Chef, Cashier, satisfaction, scoreboard |
+| 2 | [`stage-2`](https://github.com/LF-YEOH/sc2302-tais1-g1/tree/stage-2) | VIP and Critic customers |
+| 3 | [`stage-3`](https://github.com/LF-YEOH/sc2302-tais1-g1/tree/stage-3) | Host, combo meals, Happy Hour |
+
+## Video
+
+Total length 15:53.
+
+| Time | Segment | Presenter |
+|---|---|---|
+| 0:00 | Introduction | Yeoh Lin Feng |
+| 1:00 | 1. The game launching from the submitted project | Belgutei |
+| 2:42 | 2. Meaningful manager choices, including a decision where staff are constrained | Batsukh |
+| 4:46 | 3. A dish going READY → SERVED → payment | Tengis |
+| 6:47 | 4. A VIP or Critic behaviour | Tenuun |
+| 9:12 | 5. A Stage 3 feature (Happy Hour, combo meals, Host) | Belgutei |
+| 11:31 | 6. One victory and one defeat | Yeoh Lin Feng |
+| 13:36 | 7. The stage tag comparisons and the diagrams | Yeoh Lin Feng |
+
 ## Build and run
 
 Requires a JDK (Java 17 or newer). From the repository root:
